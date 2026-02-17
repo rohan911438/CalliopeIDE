@@ -58,8 +58,8 @@ def test_full_database_functionality():
         try:
             # TEST 1: Database file creation
             print("\n📁 TEST 1: Database file creation")
-            ensure_database_directory()
             db = init_db(app)
+            ensure_database_directory()
             
             if os.path.exists(test_db_path):
                 test_results.append("✅ Database file created automatically")
