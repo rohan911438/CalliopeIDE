@@ -1,0 +1,32 @@
+# Calliope IDE - Development Override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Hot-reload enabled for both frontend and backend
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./pages:/app/pages
+      - ./components:/app/components
+      - ./styles:/app/styles
+      - ./public:/app/public
+      - ./config:/app/config
+      - ./layouts:/app/layouts
+      - ./lib:/app/lib
+      - ./types:/app/types
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["python", "start.py"]
+    volumes:
+      - ./server:/app
+      - backend-data:/app/data
+    environment:
+      - FLASK_ENV=development

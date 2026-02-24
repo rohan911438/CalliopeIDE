@@ -137,6 +137,101 @@ Calliope IDE addresses these challenges by providing:
 3.  **Access the IDE**:
     Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## 🐳 Docker Setup (Recommended)
+
+The easiest way to run Calliope IDE is with Docker — no need to manually install Node.js, Python, or any dependencies.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (v20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
+
+### Quick Start
+
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/kentuckyfriedcode/CalliopeIDE.git
+    cd CalliopeIDE
+    ```
+
+2. **Set up environment variables**:
+    ```bash
+    cp .env.docker .env
+    ```
+    Edit `.env` and add your `GEMINI_API_KEY` and update the secret keys.
+
+3. **Build and start**:
+    ```bash
+    docker-compose up --build
+    ```
+
+4. **Access the application**:
+    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - Backend API: [http://localhost:5000](http://localhost:5000)
+    - Health Check: [http://localhost:5000/health](http://localhost:5000/health)
+
+### Development Mode
+
+For local development with hot-reload (code changes reflect instantly):
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+### Useful Commands
+
+| Command | Description |
+|---------|-------------|
+| `docker-compose up --build` | Build and start all services |
+| `docker-compose up -d` | Start in background (detached) |
+| `docker-compose down` | Stop all services |
+| `docker-compose down -v` | Stop and remove volumes (resets database) |
+| `docker-compose logs -f backend` | Follow backend logs |
+| `docker-compose logs -f frontend` | Follow frontend logs |
+| `docker-compose ps` | Show running containers |
+| `docker-compose restart backend` | Restart only the backend |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FRONTEND_PORT` | `3000` | Port for the Next.js frontend |
+| `BACKEND_PORT` | `5000` | Port for the Flask backend |
+| `FLASK_ENV` | `production` | Flask environment (`production` or `development`) |
+| `SECRET_KEY` | — | Flask secret key (⚠️ change in production!) |
+| `JWT_SECRET_KEY` | — | JWT signing key (⚠️ change in production!) |
+| `JWT_ACCESS_TOKEN_EXPIRES` | `3600` | Access token lifetime in seconds |
+| `JWT_REFRESH_TOKEN_EXPIRES` | `2592000` | Refresh token lifetime in seconds |
+| `RATE_LIMIT_ENABLED` | `true` | Enable/disable API rate limiting |
+| `RATE_LIMIT_PER_MINUTE` | `60` | Max API requests per minute |
+| `GEMINI_API_KEY` | — | Google Gemini API key for AI features |
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────┐
+│              Docker Compose                   │
+│                                               │
+│  ┌─────────────┐      ┌──────────────────┐   │
+│  │  Frontend    │      │   Backend        │   │
+│  │  (Next.js)  │─────▶│   (Flask)        │   │
+│  │  Port 3000  │      │   Port 5000      │   │
+│  └─────────────┘      │   + SQLite DB    │   │
+│                        │   + AI Agent     │   │
+│                        └──────────────────┘   │
+│                              │                │
+│                        [backend-data]         │
+│                        (persistent volume)    │
+└──────────────────────────────────────────────┘
+```
+
+### Troubleshooting
+
+- **Port already in use**: Change `FRONTEND_PORT` or `BACKEND_PORT` in `.env`
+- **Backend unhealthy**: Check logs with `docker-compose logs backend`
+- **Database reset**: Run `docker-compose down -v` to wipe the SQLite volume
+- **Build cache issues**: Run `docker-compose build --no-cache`
+
 ## Contributing
 
 We welcome contributions from the open-source community!

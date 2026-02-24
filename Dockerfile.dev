@@ -1,0 +1,15 @@
+# ---- Calliope IDE Frontend (Development) ----
+# Hot-reload enabled for local development
+
+FROM node:18-alpine
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+EXPOSE 3000
+
+# Use Next.js dev server with turbopack for fast refresh
+CMD ["npm", "run", "dev"]
