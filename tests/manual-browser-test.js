@@ -25,14 +25,22 @@ function testErrorHandler() {
     status: 500,
     message: 'SQLException: Connection failed at line 1247 in DatabaseController.java'
   };
-  
-  // This should be available if your error handler is loaded
-  if (typeof window.handleApiError === 'function') {
-    const sanitized = window.handleApiError(sensitiveError);
+
+  // Try to locate the API error handler that the app exposes
+  const handler =
+    (typeof window !== 'undefined' && (
+      window.handleApiError ||
+      (window.app && window.app.handleApiError) ||
+      (window.ErrorHandler && window.ErrorHandler.handleApiError)
+    )) || null;
+
+  if (typeof handler === 'function') {
+    const sanitized = handler(sensitiveError);
     console.log('Raw error:', sensitiveError.message);
     console.log('✅ Sanitized:', sanitized.message);
   } else {
-    console.log('⚠️  Error handler not found on window object');
+    console.log('⚠️  Error handler not found on any known global.');
+    console.log('ℹ️  For this manual test, either attach your module export to window.handleApiError or update the handler lookup above to match your app.');
   }
 }
 
