@@ -92,7 +92,7 @@ if (isNode && typeof fetch === 'undefined') {
   };
 }
 
-// Error handling utilities (imported from our lib/error-handler.ts)
+// Mock error handling utilities (test-only version of our lib/error-handler.ts)
 const handleApiError = (error) => {
   // Handle fetch/network errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
