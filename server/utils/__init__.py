@@ -17,6 +17,11 @@ from .validators import (
     validate_login_data,
     sanitize_input
 )
+from .agent_validators import (
+    validate_agent_input,
+    sanitize_agent_input,
+    is_dangerous_command
+)
 from .secure_execution import (
     secure_execute,
     SecurityError,
@@ -36,6 +41,9 @@ __all__ = [
     'validate_registration_data',
     'validate_login_data',
     'sanitize_input',
+    'validate_agent_input',
+    'sanitize_agent_input',
+    'is_dangerous_command',
     'secure_execute',
     'SecurityError',
     'ExecutionTimeoutError',
