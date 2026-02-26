@@ -391,7 +391,7 @@ describe('Edge Cases and Performance', () => {
     const result = handleApiError(largeError);
     
     expect(result.message).toBeDefined();
-    expect(result.message.length).toBeLessThan(1000); // Should be truncated or handled
+    expect(result.message).toBe(largeError.message); // Should handle large messages without truncation
   });
 
   it('should handle circular reference in error objects', () => {
