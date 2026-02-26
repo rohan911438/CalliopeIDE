@@ -70,8 +70,9 @@ async function testChatError() {
   console.log('\n5️⃣ Testing Chat Error...');
   
   // Find send button
+  const allButtons = Array.from(document.querySelectorAll('button'));
   const sendButton = document.querySelector('button[type="submit"]') ||
-                    document.querySelector('button:contains("Send")') ||
+                    allButtons.find(btn => btn.textContent && btn.textContent.trim() === 'Send') ||
                     document.querySelector('.send-button');
   
   if (sendButton) {
