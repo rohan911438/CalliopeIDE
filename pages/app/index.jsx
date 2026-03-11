@@ -635,9 +635,13 @@ export default function Home() {
                                                 }
                                                 e.target.style.backgroundColor = selectedItem == i ? "#222" : "#111"
                                             }}
+                                            onFocus={() => {
+                                                selectedItem = i
+                                            }}
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter" || e.key === " ") {
                                                     e.preventDefault()
+                                                    selectedItem = i
                                                     ChatHistoryKeyboardHandler({ "key": "Enter" })
                                                 }
                                             }}
