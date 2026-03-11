@@ -134,10 +134,10 @@
 npm install
 
 # Run accessibility tests
-npm test accessibility.test.tsx
+npm test -- accessibility.test.tsx
 
 # Run with coverage
-npm test -- --coverage accessibility.test.tsx
+npm test -- --coverage --testPathPattern=accessibility.test.tsx
 ```
 
 ### Lighthouse Audit
