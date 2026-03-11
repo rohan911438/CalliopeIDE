@@ -48,10 +48,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       // Ensure button works with space bar and enter
       if (event.key === " " || event.key === "Enter") {
         event.preventDefault()
-        // Trigger onClick if it exists
-        if (onClick) {
-          onClick(event as any)
-        }
+        // Synthesize a click on the current target to preserve native semantics
+        ;(event.currentTarget as HTMLElement).click()
       }
       
       // Call original onKeyDown if provided
