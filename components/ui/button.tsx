@@ -47,6 +47,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
       // Ensure button works with space bar and enter
       if (event.key === " " || event.key === "Enter") {
+      // Only handle keyboard events if not using asChild (Slot)
+      if (!asChild && (event.key === ' ' || event.key === 'Enter')) {
         event.preventDefault()
         // Synthesize a click on the current target to preserve native semantics
         ;(event.currentTarget as HTMLElement).click()
@@ -65,6 +67,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         onClick={onClick}
         onKeyDown={handleKeyDown}
+        onKeyDown={!asChild ? handleKeyDown : props.onKeyDown}
+        {...props}
       />
     )
   }

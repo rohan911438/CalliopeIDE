@@ -620,7 +620,8 @@ export default function Home() {
                                                 if (event.target.id == "") {
                                                     event.target = event.target.parentElement
                                                 }
-                                                selectedItem = Number(event.target.id.split("selection_")[1])
+                                                const itemIndex = Number(event.target.id.split("selection_")[1])
+                                                setSelectedItem(itemIndex)
                                                 ChatHistoryKeyboardHandler({ "key": "Enter" })
                                             }}
                                             onMouseEnter={(e) => {
