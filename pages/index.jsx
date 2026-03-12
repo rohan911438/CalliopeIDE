@@ -70,7 +70,6 @@ export default function Home() {
                             >
                                 <Link 
                                     href={item.href} 
-                                    aria-label={`Navigate to ${item.name} section`}
                                     className="text-sm font-medium text-white/70 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#9FEF00] focus:ring-offset-2 focus:ring-offset-[#0D1117] rounded-md px-2 py-1"
                                 >
                                     {item.name}
