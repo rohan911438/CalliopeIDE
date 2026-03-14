@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import Link from "next/link"
+import { useRouter } from "next/router"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Code, Database, ExternalLink, Github, Rocket, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { GradientBackground } from "@/components/gradient-background"
 import { FeatureCard } from "@/components/feature-card"
 import { CodePreview } from "@/components/code-preview"
@@ -12,14 +14,20 @@ import { HeroImage } from "@/components/hero-image"
 import { LogoCloud } from "@/components/logo-cloud"
 import { TextReveal } from "@/components/text-reveal"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/lib/toast"
+import { apiFetch, getFriendlyError } from "@/lib/api-client"
 
 export default function Home() {
     const [scrolled, setScrolled] = useState(false)
+    const [prompt, setPrompt] = useState("")
+    const [isGenerating, setIsGenerating] = useState(false)
     const heroRef = useRef(null)
     const featuresRef = useRef(null)
     const { scrollYProgress } = useScroll()
     const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
     const y = useTransform(scrollYProgress, [0, 0.2], [0, -50])
+    const { showToast } = useToast()
+    const router = useRouter()
 
     useEffect(() => {
         const handleScroll = () => {
@@ -29,6 +37,29 @@ export default function Home() {
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
+
+    const handleGenerate = useCallback(async (e) => {
+        e.preventDefault()
+        if (!prompt.trim()) {
+            showToast("Please describe your project before generating.", "warning")
+            return
+        }
+        setIsGenerating(true)
+        try {
+            await apiFetch("/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: prompt.trim() }),
+                timeoutMs: 45_000,
+            })
+            // Navigate to the app after successful generation
+            router.push("/app")
+        } catch (err) {
+            showToast(getFriendlyError(err), "error")
+        } finally {
+            setIsGenerating(false)
+        }
+    }, [prompt, showToast, router])
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0D1117] text-white overflow-hidden">
@@ -350,23 +381,33 @@ export default function Home() {
                                 <div className="absolute -inset-px bg-gradient-to-r from-white/5 to-white/5 rounded-xl opacity-50 blur-sm"></div>
                                 <div className="relative rounded-xl border border-white/10 bg-[#0D1117]/90 backdrop-blur-sm shadow-2xl overflow-hidden">
                                     <div className="p-6 relative">
-                                        <form action="/api/generate" method="POST">
+                                        <form onSubmit={handleGenerate}>
                                             <textarea
-                                                className="min-h-[200px] w-full rounded-md border border-white/10 bg-[#0D1117]/90 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:ring-1 focus:ring-white/10 focus-visible:outline-none transition-all duration-300"
+                                                className="min-h-[200px] w-full rounded-md border border-white/10 bg-[#0D1117]/90 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:ring-1 focus:ring-white/10 focus-visible:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 placeholder="Describe your Soroban smart contract idea or project requirements..."
-                                                name="prompt"
+                                                value={prompt}
+                                                onChange={(e) => setPrompt(e.target.value)}
+                                                disabled={isGenerating}
                                                 required
-                                            ></textarea>
+                                            />
                                             <div className="mt-4 flex justify-end">
-                                                <Link href="/app">
-                                                    <Button
-                                                        type="submit"
-                                                        className="bg-[#9FEF00] text-black hover:bg-[#9FEF00]/80 gap-2 h-10 px-4 rounded-md group"
-                                                    >
-                                                        Generate Project
-                                                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                                                    </Button>
-                                                </Link>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isGenerating || !prompt.trim()}
+                                                    className="bg-[#9FEF00] text-black hover:bg-[#9FEF00]/80 gap-2 h-10 px-4 rounded-md group disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+                                                    {isGenerating ? (
+                                                        <>
+                                                            <Spinner className="size-4 text-black" label="Generating…" />
+                                                            Generating…
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            Generate Project
+                                                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                                        </>
+                                                    )}
+                                                </Button>
                                             </div>
                                         </form>
                                     </div>
