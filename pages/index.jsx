@@ -77,13 +77,11 @@ export default function Home() {
                         transition={{ duration: 0.5, delay: 0.4 }}
                         className="flex items-center gap-2 sm:gap-4"
                     >
-                        <Link href="https://github.com/aludyalu/chatterji" target="_blank" className="text-white/70 hover:text-[#9FEF00] transition-colors">
-                            <Github className="size-4 sm:size-5" />
-                        <ThemeToggle />
                         <Link href="https://github.com/aludyalu/chatterji" target="_blank" className="text-foreground/70 hover:text-emerald-600 dark:hover:text-[#9FEF00] transition-colors">
                             <Github className="size-5" />
                             <span className="sr-only">GitHub</span>
                         </Link>
+                        <ThemeToggle />
                         <Link href="/app">
                             <Button className="h-8 sm:h-10 px-3 sm:px-4 text-sm bg-[#9FEF00] text-black hover:bg-[#9FEF00]/80 transition-colors">
                                 <span className="hidden sm:inline">Get Started</span>
@@ -102,7 +100,6 @@ export default function Home() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5 }}
-                                className="inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/90 text-xs sm:text-sm mb-4"
                                 className="theme-panel inline-flex items-center px-3 py-1 rounded-full border text-sm mb-4"
                             >
                                 <Terminal className="mr-2 h-4 w-4" /> Introducing Calliope IDE
@@ -319,10 +316,10 @@ export default function Home() {
                             </FeatureCard>
                         </div>
                     </div>
-                </section >
+                </section>
 
                 {/* Get Started Section */}
-                < section className="py-24 relative overflow-hidden" >
+                <section className="py-24 relative overflow-hidden">
                     <div className="absolute inset-0 bg-background opacity-50"></div>
 
                     <div className="mx-auto px-8 w-full relative z-10">
@@ -380,7 +377,7 @@ export default function Home() {
                             </motion.div>
                         </div>
                     </div>
-                </section >
+                </section>
 
                 <section className="py-24 relative">
                     <div className="mx-auto px-8 w-full">
@@ -478,7 +475,6 @@ export default function Home() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.1 }}
-                                className="text-white/70 text-lg sm:text-xl mb-8 sm:mb-10 max-w-xl mx-auto"
                                 className="text-foreground/70 text-xl mb-10 max-w-xl mx-auto"
                             >
                                 Join thousands of developers building innovative smart contracts with Calliope IDE.
@@ -499,7 +495,6 @@ export default function Home() {
                                 <Link href="https://cal.com/atharv777" target="_blank">
                                     <Button
                                         variant="outline"
-                                        className="w-full sm:w-auto h-10 sm:h-12 px-4 sm:px-6 border-white/10 text-white hover:bg-white/10 hover:border-white/20 hover:text-white group"
                                         className="h-12 px-6 border-border/80 text-foreground hover:bg-accent hover:border-border hover:text-accent-foreground group"
                                     >
                                         Schedule a Demo
@@ -510,7 +505,7 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
-            </main >
+            </main>
 
             <footer className="border-t border-border/70 py-16 relative">
                 <div className="mx-auto px-8 w-full">
@@ -576,6 +571,6 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
-        </div >
+        </div>
     )
 }
