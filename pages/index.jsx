@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/router"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Code, Database, ExternalLink, Github, Rocket, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,7 +23,6 @@ export default function Home() {
     const [generateError, setGenerateError] = useState("")
     const heroRef = useRef(null)
     const featuresRef = useRef(null)
-    const router = useRouter()
     const { scrollYProgress } = useScroll()
     const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
     const y = useTransform(scrollYProgress, [0, 0.2], [0, -50])
@@ -59,7 +57,7 @@ export default function Home() {
                 friendlyErrorMessage: "Project generation is currently unavailable. Please try again shortly.",
             })
 
-            router.push("/app")
+            window.location.assign("/app")
         } catch (error) {
             const safeMessage = error?.userMessage || "Unable to generate project right now."
             setGenerateError(safeMessage)
