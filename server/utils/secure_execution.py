@@ -6,6 +6,8 @@ It implements comprehensive security measures to prevent malicious access to the
 """
 
 import ast
+import logging
+from .docker_execution import execute_in_docker
 import os
 import re
 import signal
@@ -15,7 +17,7 @@ import tempfile
 import threading
 import time
 from typing import Dict, Any, List, Optional
-import logging
+# import logging (already imported)
 
 # Try to import resource module (Unix only)
 try:
@@ -268,82 +270,37 @@ os.system = lambda cmd: None
             # Prepare restricted environment
             env = create_restricted_environment()
             
-            # Execute the code in subprocess with restrictions
+            # Execute the code inside a Docker container for isolation
             try:
-                # Create preexec function for Unix systems
-                def preexec_fn():
-                    if sys.platform != 'win32':
-                        set_memory_limit()
-                        # Set process group to allow killing child processes
-                        os.setpgrp()
-                
-                preexec = preexec_fn if sys.platform != 'win32' else None
-                
-                # Run the subprocess
-                process = subprocess.Popen(
-                    [sys.executable, script_path],
-                    cwd=temp_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    env=env,
-                    preexec_fn=preexec,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == 'win32' else 0
-                )
-                
+                # Use Docker execution utility
+                result = execute_in_docker(wrapped_code, timeout=timeout)
+                # Ensure result contains required keys
+                required_keys = {'status', 'output', 'error', 'execution_time'}
+                if not required_keys.issubset(result.keys()):
+                    raise ValueError('Docker execution returned incomplete result')
+                return result
+            except Exception as e:
+                # Fallback to subprocess execution if Docker fails unexpectedly
+                logger.error(f'Docker execution failed: {str(e)}')
+                # Preserve original behavior as a safety net
                 try:
+                    process = subprocess.Popen(
+                        [sys.executable, script_path],
+                        cwd=temp_dir,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        env=env,
+                        preexec_fn=None,
+                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == 'win32' else 0
+                    )
                     stdout, stderr = process.communicate(timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    # Kill the process group to ensure all child processes are terminated
-                    try:
-                        if sys.platform == 'win32':
-                            process.terminate()
-                        else:
-                            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-                    except (OSError, ProcessLookupError):
-                        pass
-                    
-                    process.kill()
-                    return {
-                        'status': 'timeout',
-                        'output': '',
-                        'error': f'Execution time limit exceeded ({timeout}s)',
-                        'execution_time': timeout
-                    }
-                
-                execution_time = time.time() - start_time
-                
-                # Check output size limits
-                if len(stdout) > MAX_OUTPUT_SIZE:
-                    stdout = stdout[:MAX_OUTPUT_SIZE] + '\n... (output truncated)'
-                
-                if len(stderr) > MAX_OUTPUT_SIZE:
-                    stderr = stderr[:MAX_OUTPUT_SIZE] + '\n... (error output truncated)'
-                
-                # Determine result status
-                if process.returncode == 0:
-                    if stderr:
-                        # There might be warnings but execution succeeded
+                    execution_time = time.time() - start_time
+                    if process.returncode == 0:
                         return {
                             'status': 'success',
                             'output': stdout,
-                            'error': f'Warnings: {stderr}',
-                            'execution_time': execution_time
-                        }
-                    else:
-                        return {
-                            'status': 'success',
-                            'output': stdout,
-                            'error': '',
-                            'execution_time': execution_time
-                        }
-                else:
-                    # Check for specific error types
-                    if 'MemoryError' in stderr or 'memory' in stderr.lower():
-                        return {
-                            'status': 'memory_error',
-                            'output': stdout,
-                            'error': 'Memory limit exceeded',
+                            'error': stderr,
                             'execution_time': execution_time
                         }
                     else:
@@ -353,14 +310,21 @@ os.system = lambda cmd: None
                             'error': stderr or 'Unknown execution error',
                             'execution_time': execution_time
                         }
-                        
-            except Exception as e:
-                return {
-                    'status': 'error',
-                    'output': '',
-                    'error': f'Subprocess execution failed: {str(e)}',
-                    'execution_time': time.time() - start_time
-                }
+                except subprocess.TimeoutExpired:
+                    return {
+                        'status': 'timeout',
+                        'output': '',
+                        'error': f'Execution time limit exceeded ({timeout}s)',
+                        'execution_time': timeout
+                    }
+                except Exception as e2:
+                    logger.exception('Fallback subprocess execution failed')
+                    return {
+                        'status': 'error',
+                        'output': '',
+                        'error': str(e2),
+                        'execution_time': time.time() - start_time
+                    }
     
     except SecurityError as e:
         logger.warning(f"Security violation detected: {str(e)}")
