@@ -22,6 +22,8 @@ from .agent_validators import (
     sanitize_agent_input,
     is_dangerous_command
 )
+from .metrics import metrics, increment
+from .logger import log_info, log_error, log_warning, base_logger
 from .secure_execution import (
     secure_execute,
     SecurityError,

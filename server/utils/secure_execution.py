@@ -363,7 +363,8 @@ os.system = lambda cmd: None
                 }
     
     except SecurityError as e:
-        logger.warning(f"Security violation detected: {str(e)}")
+        from .logger import log_error
+        log_error(f"Security violation: {str(e)}", error=e)
         return {
             'status': 'error',
             'output': '',
@@ -372,7 +373,8 @@ os.system = lambda cmd: None
         }
     
     except Exception as e:
-        logger.error(f"Unexpected error in secure_execute: {str(e)}")
+        from .logger import log_error
+        log_error("Unexpected error in secure_execute", error=e)
         return {
             'status': 'error',
             'output': '',

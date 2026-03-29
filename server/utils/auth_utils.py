@@ -114,6 +114,9 @@ def token_required(f):
                 'error': 'Account is deactivated'
             }), 403
         
+        from flask import g
+        g.user_id = current_user.id
+        
         return f(current_user, *args, **kwargs)
     
     return decorated

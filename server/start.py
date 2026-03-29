@@ -69,6 +69,10 @@ CORS(app, resources={r"/*": {"origins": cors_origins}}, supports_credentials=Tru
 app.logger = setup_logging("calliope-ide")
 init_sentry(app)
 
+# Initialize observability middleware
+from server.middleware.observability import init_observability
+init_observability(app)
+
 # Initialize database and register blueprints
 init_db(app)
 
@@ -229,6 +233,7 @@ def monitoring_status(current_user):
             'error': 'Admin access required'
         }), 403
 
+    from server.utils.monitoring import get_monitoring_stats
     return jsonify({
         'success': True,
         'monitoring': get_monitoring_stats()
@@ -372,10 +377,22 @@ def execute_code_internal(current_user):
             timeout = 5
         
         # Log the execution attempt
-        app.logger.info(f"User {current_user.username} (ID: {current_user.id}) executing code")
+        execution_id = f"exec_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        from server.utils import logger
+        
+        logger.log_info("execution_started", extra={"execution_id": execution_id, "user_id": current_user.id})
+        
+        from flask import g
+        g.execution_id = execution_id
         
         # Execute the code securely
         result = secure_execute(code, timeout=timeout)
+        
+        # Log completion
+        logger.log_info("execution_completed", extra={
+            "execution_id": execution_id,
+            "execution_time": result.get('execution_time', 0)
+        })
         
         # Try to log code execution to chat history if session_id is provided
         session_id = data.get('session_id')
